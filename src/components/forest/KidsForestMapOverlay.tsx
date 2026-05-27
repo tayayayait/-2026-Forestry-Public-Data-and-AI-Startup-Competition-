@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, Info, MapPin, Navigation2, Phone, X } from "lucide-react";
 import type { FacilityInfo } from "@/types";
+import { useAppStore } from "@/stores/appStore";
 
 type KidsForestMapOverlayProps = {
   facility: FacilityInfo;
@@ -12,13 +13,17 @@ function getKidsForestProgram(facility: FacilityInfo) {
 }
 
 export function KidsForestMapOverlay({ facility, onClose }: KidsForestMapOverlayProps) {
+  const locationCoords = useAppStore((s) => s.location.coords);
   const program = getKidsForestProgram(facility);
   const participationMethod = program?.participationMethod;
   const period = program?.period ?? facility.operatingHours;
 
   const handleDirections = () => {
     const encodedName = encodeURIComponent(facility.name);
-    const url = `https://map.naver.com/p/directions/-/-/${encodedName},${facility.lng},${facility.lat}`;
+    const startParams = locationCoords
+      ? `&slng=${locationCoords.lng}&slat=${locationCoords.lat}&sname=${encodeURIComponent("내 위치")}`
+      : "";
+    const url = `https://map.naver.com/index.nhn?menu=route${startParams}&elng=${facility.lng}&elat=${facility.lat}&etext=${encodedName}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 

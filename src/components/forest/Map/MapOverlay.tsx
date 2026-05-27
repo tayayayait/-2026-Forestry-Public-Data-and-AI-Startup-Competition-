@@ -2,6 +2,7 @@ import { X, Navigation2, Info, BookOpen } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { getFacilityCategoryStyle } from "@/lib/facility-category-style";
 import type { FacilityInfo, TrailInfo } from "@/types";
+import { useAppStore } from "@/stores/appStore";
 
 interface MapOverlayProps {
   facility: FacilityInfo;
@@ -15,6 +16,7 @@ const difficultyLabel: Record<TrailInfo["difficulty"], string> = {
 };
 
 export function MapOverlay({ facility, onClose }: MapOverlayProps) {
+  const locationCoords = useAppStore((s) => s.location.coords);
   const trails = facility.trails.slice(0, 2);
   const educationPrograms = facility.educationPrograms?.slice(0, 2) || [];
   const categoryStyle = getFacilityCategoryStyle(facility.type);
@@ -34,9 +36,12 @@ export function MapOverlay({ facility, onClose }: MapOverlayProps) {
   }
 
   const handleDirections = () => {
-    // 네이버 지도 목적지 링크 형식: https://map.naver.com/p/directions/-/-/이름,경도,위도
+    // 네이버 지도 목적지 링크 형식: https://map.naver.com/index.nhn?menu=route&elng=경도&elat=위도&etext=이름
     const encodedName = encodeURIComponent(facility.name);
-    const url = `https://map.naver.com/p/directions/-/-/${encodedName},${facility.lng},${facility.lat}`;
+    const startParams = locationCoords
+      ? `&slng=${locationCoords.lng}&slat=${locationCoords.lat}&sname=${encodeURIComponent("내 위치")}`
+      : "";
+    const url = `https://map.naver.com/index.nhn?menu=route${startParams}&elng=${facility.lng}&elat=${facility.lat}&etext=${encodedName}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 

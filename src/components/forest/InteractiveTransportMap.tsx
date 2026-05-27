@@ -191,7 +191,7 @@ export function InteractiveTransportMap({ destination }: InteractiveTransportMap
 
   // 딥링크 생성 (에러/권한거부 폴백용)
   const encodedName = encodeURIComponent(destination.name);
-  const naverRouteUrl = `https://map.naver.com/p/directions/-/-/${encodedName},${destination.lng},${destination.lat}`;
+  const naverRouteUrl = `https://map.naver.com/index.nhn?menu=route&elng=${destination.lng}&elat=${destination.lat}&etext=${encodedName}`;
 
   // 실시간 주행 모드 관련 상태 및 로직
   const [isNaviMode, setIsNaviMode] = React.useState(false);
