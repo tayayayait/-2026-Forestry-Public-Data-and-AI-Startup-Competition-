@@ -1,6 +1,6 @@
 # Implementation Status
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 ## Current UI Shell
 
@@ -27,6 +27,7 @@ Last updated: 2026-05-26
 | Test suite          | Pass            | `npm test`                                                                                                   |
 | Type check          | Pass            | `npx tsc --noEmit`                                                                                           |
 | Production build    | Pass on Node 22 | `npm run build` uses `scripts/build-with-supported-node.cjs` to avoid the Node 24 Windows Vite/Rollup crash. |
+| Vercel SSR output   | Fixed           | `vite.config.ts` includes Nitro's Vercel preset so `npm run build` emits `.vercel/output/config.json` and routes all non-static requests to `__server`. |
 | Lint                | Pass target     | Source files were normalized with Prettier.                                                                  |
 | Supabase client URL | Fixed           | `VITE_SUPABASE_URL` now points to the project root URL, not `/rest/v1/`.                                     |
 
