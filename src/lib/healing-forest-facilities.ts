@@ -1,0 +1,575 @@
+import type {
+  FacilityDetailSection,
+  FacilityInfo,
+  HealingForestList,
+  HealingForestStatus,
+} from "@/types";
+import {
+  CURRENT_BISEULSAN_HEALING_FOREST_HOMEPAGE,
+  normalizeHomepageUrl,
+} from "./facility-homepage";
+
+type HealingForestCoordinate = {
+  serialNumber: number;
+  region: string;
+  facilityName: string;
+  address: string;
+  telephoneNumber?: string;
+  homepage?: string;
+  operatingHours?: string;
+  participationMethod?: string;
+  operator?: string;
+  lat: number;
+  lng: number;
+};
+
+const DEFAULT_ACCESSIBILITY = {
+  wheelchair: false,
+  stroller: false,
+  parking: true,
+  restroom: true,
+  elevator: false,
+  helpdog: false,
+};
+
+function detailSection(
+  title: string,
+  items: Array<{ label: string; value: string | number | null | undefined }>,
+): FacilityDetailSection | null {
+  const filteredItems = items
+    .map(({ label, value }) => ({ label, value: `${value ?? ""}`.trim() }))
+    .filter((item) => item.value);
+
+  return filteredItems.length > 0 ? { title, items: filteredItems } : null;
+}
+
+export const HEALING_FOREST_COORDINATES: HealingForestCoordinate[] = [
+  {
+    serialNumber: 31,
+    region: "경상도",
+    facilityName: "부산 치유의 숲",
+    address: "부산광역시 기장군 철마면 철마천로 101",
+    telephoneNumber: "051-976-2831",
+    homepage: "http://www.busan.go.kr/green/hfprogram",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.267164364913185,
+    lng: 129.1366519113519,
+  },
+  {
+    serialNumber: 32,
+    region: "경상도",
+    facilityName: "비슬산 치유의 숲",
+    address: "대구광역시 달성군 유가읍 일연선사길 40",
+    telephoneNumber: "053-659-4181",
+    homepage: CURRENT_BISEULSAN_HEALING_FOREST_HOMEPAGE,
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.68402493686088,
+    lng: 128.51305962122126,
+  },
+  {
+    serialNumber: 14,
+    region: "충청도",
+    facilityName: "대전 치유의 숲",
+    address: "대전광역시 중구 무수동 188",
+    telephoneNumber: "042-270-6594",
+    homepage: "https://cafe.naver.com/happygoing6053",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 36.2903910392417,
+    lng: 127.41139786372328,
+  },
+  {
+    serialNumber: 29,
+    region: "경상도",
+    facilityName: "대운산 치유의 숲",
+    address: "울산광역시 울주군 온양읍 대운상대길 225-92",
+    telephoneNumber: "052-255-9800",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 35.393757235134316,
+    lng: 129.2243231889717,
+  },
+  {
+    serialNumber: 4,
+    region: "경기도",
+    facilityName: "하늘아래 치유의 숲",
+    address: "경기도 포천시 신북면 금동리 산39",
+    telephoneNumber: "031-538-3337",
+    homepage: "https://www.pocheon.go.kr/ktour/contents.do?key=7662",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 37.92446576081318,
+    lng: 127.13920629972284,
+  },
+  {
+    serialNumber: 2,
+    region: "경기도",
+    facilityName: "국립 양평 치유의 숲",
+    address: "경기도 양평군 양동면 황거길 262-10",
+    telephoneNumber: "031-8079-7950",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 37.464391206197924,
+    lng: 127.71641457700603,
+  },
+  {
+    serialNumber: 1,
+    region: "경기도",
+    facilityName: "산음 치유의 숲",
+    address: "경기도 양평군 단월면 고북길 347",
+    telephoneNumber: "031-774-7687",
+    homepage: "https://cafe.naver.com/saneumhealing",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 37.60455927717994,
+    lng: 127.5784207834287,
+  },
+  {
+    serialNumber: 5,
+    region: "경기도",
+    facilityName: "용문산 치유의 숲",
+    address: "경기도 양평군 양평읍 백안리 산 68-5",
+    telephoneNumber: "070-8811-1008",
+    homepage: "http://www.swijapark.com",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 37.516162676383495,
+    lng: 127.52829148302607,
+  },
+  {
+    serialNumber: 3,
+    region: "경기도",
+    facilityName: "잣향기 푸른숲",
+    address: "경기도 가평군 상면 축령로 289-146",
+    telephoneNumber: "031-8008-6769",
+    homepage: "http://farm.gg.go.kr/sigt/89",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 37.76256717149689,
+    lng: 127.33384595126648,
+  },
+  {
+    serialNumber: 7,
+    region: "강원도",
+    facilityName: "대관령 치유의 숲",
+    address: "강원도 강릉시 성산면 대관령옛길 127-42",
+    telephoneNumber: "033-642-8630",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 37.70820641281942,
+    lng: 128.7987313246366,
+  },
+  {
+    serialNumber: 9,
+    region: "강원도",
+    facilityName: "삼척 활기 치유의 숲",
+    address: "강원도 삼척시 미로면 활기리 산34",
+    telephoneNumber: "033-571-2600",
+    homepage: "https://www.samcheok.go.kr/healinglife",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 37.3854574503457,
+    lng: 129.05392564300413,
+  },
+  {
+    serialNumber: 6,
+    region: "강원도",
+    facilityName: "청태산 치유의 숲",
+    address: "강원도 횡성군 둔내면 청태산로 777",
+    telephoneNumber: "033-340-6300",
+    homepage: "http://hoengseong.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 37.5371195938317,
+    lng: 128.28951475520728,
+  },
+  {
+    serialNumber: 8,
+    region: "강원도",
+    facilityName: "망경대산 치유의 숲",
+    address: "강원도 영월군 중동면 선도우길 177",
+    telephoneNumber: "033-375-8600",
+    homepage: "https://www.ywfmc.or.kr/contents.do?cid=3125f4263ea041ec99dd7db1bffc632d",
+    operatingHours: "4월~11월",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 37.1762700447111,
+    lng: 128.5976640513834,
+  },
+  {
+    serialNumber: 11,
+    region: "강원도",
+    facilityName: "로미지안 치유의 숲",
+    address: "강원도 정선군 북평면 나전리 산 115",
+    telephoneNumber: "052-562-3382",
+    homepage: "https://www.romyziangarden.com",
+    participationMethod: "전화/홈페이지",
+    operator: "사립",
+    lat: 37.43931903329031,
+    lng: 128.63931725737805,
+  },
+  {
+    serialNumber: 10,
+    region: "강원도",
+    facilityName: "힐리언스선마을",
+    address: "강원도 홍천군 서면 종자산길 122",
+    telephoneNumber: "1588-9983",
+    homepage: "https://www.healience.co.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "사립",
+    lat: 37.65135030368272,
+    lng: 127.62984936378392,
+  },
+  {
+    serialNumber: 15,
+    region: "충청도",
+    facilityName: "계명산 치유의 숲",
+    address: "충청북도 충주시 충주호수로 1170",
+    telephoneNumber: "043-870-7934",
+    homepage: "http://www.cjfmc.or.kr/gmf/contents.do?key=267",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 36.98830798003715,
+    lng: 127.98450624491845,
+  },
+  {
+    serialNumber: 17,
+    region: "충청도",
+    facilityName: "장령산 치유의 숲",
+    address: "충청북도 옥천군 군서면 금산리 산15-1",
+    telephoneNumber: "043-733-9615",
+    homepage: "http://www.oc.go.kr/jrhuyang/index.do",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 36.23919670900572,
+    lng: 127.56244702719617,
+  },
+  {
+    serialNumber: 16,
+    region: "충청도",
+    facilityName: "민주지산 치유의 숲",
+    address: "충청북도 영동군 용화면 휴양림길 60",
+    telephoneNumber: "043-745-3438",
+    homepage: "https://www.yd21.go.kr/portal/html/sub04/0402.html",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 36.053421864665324,
+    lng: 127.82468036641875,
+  },
+  {
+    serialNumber: 13,
+    region: "충청도",
+    facilityName: "제천 치유의 숲",
+    address: "충청북도 제천시 청풍면 학현소야로 590",
+    telephoneNumber: "043-653-9870",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 37.0112844795672,
+    lng: 128.24782114576485,
+  },
+  {
+    serialNumber: 18,
+    region: "충청도",
+    facilityName: "생거진천 치유의 숲",
+    address: "충청북도 진천군 이월면 송림리 산 29-1",
+    telephoneNumber: "043-539-4387",
+    homepage: "http://jincheon.huyang.co.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 36.92867512329429,
+    lng: 127.40238272632793,
+  },
+  {
+    serialNumber: 19,
+    region: "충청도",
+    facilityName: "성불산 치유의 숲",
+    address: "충청북도 괴산군 괴산읍 검승리 산28-1",
+    telephoneNumber: "070-4901-0739",
+    participationMethod: "전화",
+    operator: "공립",
+    lat: 36.80466571503288,
+    lng: 127.8498454629268,
+  },
+  {
+    serialNumber: 20,
+    region: "충청도",
+    facilityName: "서천 치유의 숲",
+    address: "충청남도 서천군 종천면 종천리 산1-1",
+    telephoneNumber: "041-953-8771",
+    homepage: "https://www.seocheon.go.kr/healing/",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 36.12179224451347,
+    lng: 126.66151616992691,
+  },
+  {
+    serialNumber: 12,
+    region: "충청도",
+    facilityName: "예산 치유의 숲",
+    address: "충청남도 예산군 예산읍 치유숲길 203-31",
+    telephoneNumber: "041-330-0902",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 36.703196974919145,
+    lng: 126.8595077803485,
+  },
+  {
+    serialNumber: 28,
+    region: "전라도",
+    facilityName: "흑석산 치유의 숲",
+    address: "전라남도 해남군 계곡면 산골길 306",
+    telephoneNumber: "061-530-5737",
+    homepage: "http://heukseok.haenam.go.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 34.67310326321298,
+    lng: 126.61126694559957,
+  },
+  {
+    serialNumber: 22,
+    region: "전라도",
+    facilityName: "곡성 치유의 숲",
+    address: "전라남도 곡성군 곡성읍 청계동로 519",
+    telephoneNumber: "061-363-0901",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 35.31067410843117,
+    lng: 127.24896256939782,
+  },
+  {
+    serialNumber: 26,
+    region: "전라도",
+    facilityName: "팔영산 편백 치유의 숲",
+    address: "전라남도 고흥군 영남면 천사로 529-191",
+    telephoneNumber: "061-830-6984",
+    homepage: "http://chiyu.goheung.go.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 34.61944758485487,
+    lng: 127.40991020669024,
+  },
+  {
+    serialNumber: 23,
+    region: "전라도",
+    facilityName: "장흥 편백 치유의 숲",
+    address: "전라남도 장흥군 장흥읍 우산리 산 20-26",
+    telephoneNumber: "061-864-3265",
+    homepage: "https://www.jhwoodland.co.kr/subpage/?site=wood&mn=1161",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 34.6659178814745,
+    lng: 126.93360670022942,
+  },
+  {
+    serialNumber: 21,
+    region: "전라도",
+    facilityName: "장성 치유의 숲",
+    address: "전라남도 장성군 서삼면 추암로 716",
+    telephoneNumber: "061-393-1777",
+    homepage: "http://jangseong.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 35.36859073355491,
+    lng: 126.73147399234304,
+  },
+  {
+    serialNumber: 24,
+    region: "전라도",
+    facilityName: "만연산 치유의 숲",
+    address: "전라남도 화순군 화순읍 동구리 181-3번지",
+    telephoneNumber: "061-379-5896",
+    homepage: "https://forest.hwasun.go.kr/contents.do?S=S01&M=010403000000",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.08466447814184,
+    lng: 126.98223139238007,
+  },
+  {
+    serialNumber: 27,
+    region: "전라도",
+    facilityName: "백운산 치유의 숲",
+    address: "전라남도 광양시 옥룡면 백계로 337",
+    telephoneNumber: "061-763-8675",
+    homepage: "https://bwmt.gwangyang.go.kr/bmt/contents/heal/heal_info.jsp",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.06017324295759,
+    lng: 127.59045807455779,
+  },
+  {
+    serialNumber: 25,
+    region: "전라도",
+    facilityName: "빛가람 치유의 숲",
+    address: "전라남도 나주시 산포면 산제리 542-6",
+    telephoneNumber: "061-338-4255",
+    homepage: "https://jnforest.jeonnam.go.kr/content/view.do?=undefined&menuCd=FOREST003002002",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.008804437350705,
+    lng: 126.82332719818397,
+  },
+  {
+    serialNumber: 33,
+    region: "경상도",
+    facilityName: "내연산 치유의 숲",
+    address: "경상북도 포항시 북구 송라면 중산리 555번지",
+    telephoneNumber: "054-728-9200",
+    participationMethod: "전화",
+    operator: "공립",
+    lat: 36.248885963804476,
+    lng: 129.3129180627067,
+  },
+  {
+    serialNumber: 30,
+    region: "경상도",
+    facilityName: "김천 치유의 숲",
+    address: "경상북도 김천시 증산면 수도길 1237-89",
+    telephoneNumber: "054-435-3413",
+    homepage: "http://www.fowi.or.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "국립",
+    lat: 35.84125599494209,
+    lng: 128.01052834590172,
+  },
+  {
+    serialNumber: 34,
+    region: "경상도",
+    facilityName: "창원 편백 치유의 숲",
+    address: "경상남도 창원시 진해구 태백동 산52-1",
+    telephoneNumber: "055-225-4241",
+    homepage: "https://www.changwon.go.kr/depart/contents.do?mId=0310060000",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.17438898436,
+    lng: 128.66470357460986,
+  },
+  {
+    serialNumber: 36,
+    region: "경상도",
+    facilityName: "대봉산 치유의 숲",
+    address: "경상남도 함양군 병곡면 광평리 산22-4",
+    telephoneNumber: "055-964-1090",
+    homepage: "https://www.hygn.go.kr/04097/04112/04161.web",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.58654660629684,
+    lng: 127.70832022400519,
+  },
+  {
+    serialNumber: 37,
+    region: "경상도",
+    facilityName: "거창 치유의 숲",
+    address: "경상남도 거창군 가조면 수월리 산19-4",
+    telephoneNumber: "055-940-7930",
+    homepage: "http://healingland.foresttrip.go.kr",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.73620761988674,
+    lng: 128.04076692451522,
+  },
+  {
+    serialNumber: 35,
+    region: "경상도",
+    facilityName: "오도산 치유의 숲",
+    address: "경상남도 합천군 봉산면 오도산휴양로 398",
+    telephoneNumber: "055-930-3739",
+    homepage: "https://www.foresttrip.go.kr/indvz/main.do?hmpgId=ID02030068",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 35.67045187188696,
+    lng: 128.06008785154265,
+  },
+  {
+    serialNumber: 38,
+    region: "제주도",
+    facilityName: "서귀포 치유의 숲",
+    address: "제주특별자치도 서귀포시 산록남로 2271",
+    telephoneNumber: "064-760-3067",
+    homepage: "https://healing.seogwipo.go.kr/healing/application.htm",
+    participationMethod: "전화/홈페이지",
+    operator: "공립",
+    lat: 33.30254968807039,
+    lng: 126.5245745693566,
+  },
+];
+
+function normalizeKey(value: string | undefined): string {
+  return (value ?? "")
+    .replace(/^국립\s*/, "")
+    .replace(/\s+/g, "")
+    .replace(/[()·ㆍ._-]/g, "")
+    .toLowerCase();
+}
+
+function toFacility(
+  coordinate: HealingForestCoordinate,
+  status?: HealingForestStatus,
+): FacilityInfo {
+  const operator = status?.operator ?? coordinate.operator;
+  const participationMethod = status?.participationMethod ?? coordinate.participationMethod;
+  const telephoneNumber = status?.telephoneNumber ?? coordinate.telephoneNumber;
+  const homepage = normalizeHomepageUrl(status?.homepage ?? coordinate.homepage);
+  const detailSections = [
+    detailSection("운영 정보", [
+      { label: "관리주체", value: operator },
+      { label: "참여방법", value: participationMethod },
+      { label: "전화번호", value: telephoneNumber },
+      { label: "홈페이지", value: homepage },
+    ]),
+    detailSection("공공데이터 출력값", [
+      { label: "연번", value: status?.serialNumber ?? coordinate.serialNumber },
+      { label: "지역", value: status?.region ?? coordinate.region },
+      { label: "시설명", value: status?.facilityName ?? coordinate.facilityName },
+      { label: "주소", value: status?.address ?? coordinate.address },
+    ]),
+  ].filter((section): section is FacilityDetailSection => section != null);
+
+  return {
+    id: `healing-forest-${coordinate.serialNumber}`,
+    name: status?.facilityName ?? coordinate.facilityName,
+    type: "healing_forest",
+    address: status?.address ?? coordinate.address,
+    lat: coordinate.lat,
+    lng: coordinate.lng,
+    tel: telephoneNumber,
+    homepage,
+    operatingHours: coordinate.operatingHours,
+    intro: [
+      operator ? `관리주체: ${operator}` : "",
+      participationMethod ? `참여방법: ${participationMethod}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    programs: ["산림치유"],
+    trails: [],
+    educationPrograms: [],
+    accessibility: { ...DEFAULT_ACCESSIBILITY },
+    detailSections,
+  };
+}
+
+export function mergeHealingForestStatusWithCoordinates(list: HealingForestList): FacilityInfo[] {
+  return list.items
+    .map((status) => {
+      const coordinate = HEALING_FOREST_COORDINATES.find(
+        (candidate) =>
+          normalizeKey(candidate.facilityName) === normalizeKey(status.facilityName) ||
+          normalizeKey(candidate.address) === normalizeKey(status.address),
+      );
+
+      return coordinate ? toFacility(coordinate, status) : null;
+    })
+    .filter((facility): facility is FacilityInfo => facility != null);
+}
+
+export function getStaticHealingForestFacilities(): FacilityInfo[] {
+  return HEALING_FOREST_COORDINATES.map((coordinate) => toFacility(coordinate));
+}

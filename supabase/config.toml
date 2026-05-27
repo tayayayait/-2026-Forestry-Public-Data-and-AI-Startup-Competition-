@@ -1,0 +1,44 @@
+project_id = "cewvsyvlzovjelyyzkzv"
+[functions.health-profile]
+enabled = true
+verify_jwt = false
+import_map = "./functions/health-profile/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/health-profile/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/health-profile/*.html" ]
+
+[functions.recommendations]
+enabled = true
+verify_jwt = false
+import_map = "./functions/recommendations/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/recommendations/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/recommendations/*.html" ]
+
+[functions.visit-records]
+enabled = true
+verify_jwt = false
+import_map = "./functions/visit-records/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/visit-records/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/visit-records/*.html" ]
+
+[functions.saved-courses]
+enabled = true
+verify_jwt = false
+import_map = "./functions/saved-courses/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/saved-courses/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/saved-courses/*.html" ]

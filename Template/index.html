@@ -1,0 +1,560 @@
+
+<!DOCTYPE html>
+<html lang="ko" class="antialiased selection:bg-white/20 selection:text-white">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOVA - AI Plant Design Platform</title>
+  
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'system-ui', 'sans-serif'],
+            serif: ['"Source Serif 4"', 'serif'],
+          },
+          colors: {
+            glass: {
+              100: 'rgba(255,255,255,0.02)',
+              200: 'rgba(255,255,255,0.05)',
+              300: 'rgba(255,255,255,0.1)',
+              400: 'rgba(255,255,255,0.2)',
+            }
+          },
+          animation: {
+            'marquee': 'marquee 30s linear infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            marquee: {
+              '0%': { transform: 'translateX(0%)' },
+              '100%': { transform: 'translateX(-100%)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-15px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Icons -->
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+
+  <style>
+    :root {
+      --supa-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+      background-color: #050505;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* Global Transitions */
+    .supa-transition {
+      transition: all 0.5s var(--supa-ease);
+    }
+    
+    .hover-scale {
+      transition: transform 0.4s var(--supa-ease);
+    }
+    .hover-scale:hover {
+      transform: scale(1.03);
+    }
+    .hover-scale:active {
+      transform: scale(0.97);
+    }
+
+    /* Scroll Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      filter: blur(8px);
+      transition: opacity 0.8s var(--supa-ease), transform 0.8s var(--supa-ease), filter 0.8s var(--supa-ease);
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    /* Liquid Glass Definitions - STRICT GRAYSCALE */
+    @layer components {
+      .liquid-glass {
+        background: rgba(255,255,255,0.03);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: none;
+        box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+        position: relative;
+      }
+      .liquid-glass::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1.4px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%, transparent 40%, transparent 60%, rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      .liquid-glass-strong {
+        background: rgba(255,255,255,0.06);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: none;
+        box-shadow: 4px 4px 24px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15);
+        position: relative;
+      }
+      .liquid-glass-strong::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1.4px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 20%, transparent 40%, transparent 60%, rgba(255,255,255,0.2) 80%, rgba(255,255,255,0.5) 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+    }
+    
+    /* Grain Overlay */
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+  </style>
+</head>
+<body class="selection:bg-white/20 selection:text-white">
+
+  <!-- Grain Texture -->
+  <div class="grain"></div>
+
+  <!-- Background Video -->
+  <div class="fixed inset-0 z-0 bg-black">
+    <video 
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260315_073750_51473149-4350-4920-ae24-c8214286f323.mp4" 
+      autoplay loop muted playsinline 
+      class="w-full h-full object-cover opacity-50"
+    ></video>
+    <div class="absolute inset-0 bg-black/20 mix-blend-multiply"></div>
+    <!-- Radial gradient for readability -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]"></div>
+  </div>
+
+  <!-- Main Content Wrapper -->
+  <main class="relative z-10 w-full flex flex-col">
+
+    <!-- ==============================================
+         1. HERO SECTION (Specific Split Layout requested)
+         ============================================== -->
+    <section class="min-h-screen p-4 lg:p-6 flex flex-col lg:flex-row gap-6 w-full max-w-[100rem] mx-auto">
+      
+      <!-- LEFT PANEL (52%) -->
+      <div class="w-full lg:w-[52%] relative flex flex-col liquid-glass-strong rounded-[2.5rem] p-6 lg:p-12 overflow-hidden reveal">
+        
+        <!-- Header -->
+        <header class="flex items-center justify-between z-20">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+              <iconify-icon icon="solar:leaf-bold" class="text-black text-lg"></iconify-icon>
+            </div>
+            <span class="font-semibold text-2xl tracking-tighter text-white">NOVA</span>
+          </div>
+          <button class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover-scale">
+            <iconify-icon icon="solar:hamburger-menu-linear" class="text-xl text-white"></iconify-icon>
+          </button>
+        </header>
+
+        <!-- Center Content -->
+        <div class="flex-1 flex flex-col items-center justify-center text-center py-20 z-20">
+          <div class="w-20 h-20 rounded-[2rem] liquid-glass flex items-center justify-center mb-8 animate-float">
+            <iconify-icon icon="solar:magic-stick-3-bold-duotone" class="text-4xl text-white/90"></iconify-icon>
+          </div>
+          
+          <h1 class="text-5xl md:text-6xl lg:text-7xl font-semibold tracking-[-0.05em] text-white leading-tight break-keep-all mb-8 max-w-[15ch]">
+            식물 디자인의 <br>
+            <span class="font-serif italic text-white/80 font-light tracking-normal pr-2">새로운 영혼</span>, <br>
+            NOVA AI
+          </h1>
+
+          <button class="liquid-glass-strong group rounded-full pl-6 pr-2 py-2 flex items-center gap-4 hover-scale mb-12">
+            <span class="text-lg font-medium text-white group-hover:text-white/90 supa-transition">지금 탐험하기</span>
+            <div class="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center group-hover:bg-white/25 supa-transition">
+              <iconify-icon icon="solar:arrow-right-linear" class="text-xl text-white group-hover:translate-x-1 supa-transition"></iconify-icon>
+            </div>
+          </button>
+
+          <div class="flex flex-wrap justify-center gap-3">
+            <span class="liquid-glass rounded-full px-5 py-2.5 text-xs text-white/80 tracking-wide">예술적 갤러리</span>
+            <span class="liquid-glass rounded-full px-5 py-2.5 text-xs text-white/80 tracking-wide">AI 제너레이션</span>
+            <span class="liquid-glass rounded-full px-5 py-2.5 text-xs text-white/80 tracking-wide">3D 스트럭처</span>
+          </div>
+        </div>
+
+        <!-- Bottom Quote -->
+        <div class="mt-auto flex flex-col md:flex-row items-center justify-between gap-6 w-full border-t border-white/10 pt-6 z-20">
+          <span class="text-xs tracking-[0.2em] uppercase text-white/50 font-medium whitespace-nowrap">비저너리 디자인</span>
+          <p class="text-sm md:text-base text-white/80 break-keep-all text-center">
+            "우리는 <span class="font-serif italic text-white">한계가 없는</span> 새로운 차원을 상상했습니다."
+          </p>
+          <div class="flex items-center gap-3 whitespace-nowrap">
+            <div class="w-8 h-[1px] bg-white/20"></div>
+            <span class="text-xs tracking-widest uppercase text-white/60">MARCUS AURELIO</span>
+            <div class="w-8 h-[1px] bg-white/20"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL (48% - Hidden on Mobile) -->
+      <div class="hidden lg:flex w-[48%] flex-col gap-6 relative">
+        
+        <!-- Top Bar -->
+        <div class="flex justify-end gap-4 reveal" style="transition-delay: 100ms;">
+          <div class="liquid-glass rounded-full px-4 py-2 flex items-center gap-4">
+            <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-white supa-transition"><iconify-icon icon="solar:hashtag-linear"></iconify-icon></a>
+            <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-white supa-transition"><iconify-icon icon="solar:link-minimalistic-bold"></iconify-icon></a>
+            <a href="#" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 hover:text-white supa-transition"><iconify-icon icon="solar:camera-linear"></iconify-icon></a>
+          </div>
+          <button class="liquid-glass w-12 h-12 rounded-full flex items-center justify-center hover-scale">
+            <iconify-icon icon="solar:stars-bold" class="text-xl text-white"></iconify-icon>
+          </button>
+        </div>
+
+        <!-- Floating Community Card -->
+        <div class="self-end mt-12 w-64 liquid-glass rounded-3xl p-6 hover-scale cursor-pointer reveal" style="transition-delay: 200ms;">
+          <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4">
+            <iconify-icon icon="solar:users-group-rounded-linear" class="text-xl text-white"></iconify-icon>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">생태계 진입하기</h3>
+          <p class="text-sm text-white/60 leading-relaxed break-keep-all">전 세계 4만 명의 크리에이터와 함께 식물 디자인의 미래를 개척하세요.</p>
+        </div>
+
+        <!-- Bottom Features Grid -->
+        <div class="mt-auto liquid-glass rounded-[2.5rem] p-4 flex flex-col gap-4 reveal" style="transition-delay: 300ms;">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="liquid-glass rounded-3xl p-6 hover-scale group cursor-pointer">
+              <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4 group-hover:bg-white/20 supa-transition">
+                <iconify-icon icon="solar:magic-stick-3-linear" class="text-xl text-white"></iconify-icon>
+              </div>
+              <h4 class="text-base font-semibold text-white">데이터 프로세싱</h4>
+            </div>
+            <div class="liquid-glass rounded-3xl p-6 hover-scale group cursor-pointer">
+              <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4 group-hover:bg-white/20 supa-transition">
+                <iconify-icon icon="solar:book-bookmark-linear" class="text-xl text-white"></iconify-icon>
+              </div>
+              <h4 class="text-base font-semibold text-white">성장 아카이브</h4>
+            </div>
+          </div>
+          
+          <div class="liquid-glass rounded-3xl p-6 flex items-center justify-between hover-scale group cursor-pointer">
+            <div class="flex items-center gap-5">
+              <img src="https://images.unsplash.com/photo-1507120410856-1f35574c3b45?auto=format&fit=crop&w=150&q=80" alt="Plant" class="w-16 h-16 rounded-2xl object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 supa-transition">
+              <div>
+                <h4 class="text-lg font-semibold text-white mb-1">고급 식물 스컬프팅</h4>
+                <p class="text-sm text-white/60">AI 기반 3D 형태 변형 알고리즘</p>
+              </div>
+            </div>
+            <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/60 group-hover:bg-white group-hover:text-black supa-transition">
+              <iconify-icon icon="solar:add-linear" class="text-xl"></iconify-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         2. SOCIAL PROOF (Marquee)
+         ============================================== -->
+    <section class="py-12 border-y border-white/5 bg-black/20 backdrop-blur-sm overflow-hidden reveal">
+      <div class="max-w-[100rem] mx-auto px-6 flex items-center gap-12">
+        <p class="text-xs uppercase tracking-widest text-white/50 whitespace-nowrap hidden md:block shrink-0">Trusted ecosystem</p>
+        <div class="relative flex overflow-x-hidden flex-1 mask-image-linear-edges">
+          <div class="animate-marquee whitespace-nowrap flex items-center gap-16 md:gap-24 opacity-60">
+            <!-- Simulated Logos via Typography/Icons -->
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:infinity-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">LUMINOUS</span></div>
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:planet-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">STELLAR</span></div>
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:bolt-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">NEXUS.AI</span></div>
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:shield-check-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">VERIFY</span></div>
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:box-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">CANVAS</span></div>
+            <!-- Duplicate for seamless loop -->
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:infinity-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">LUMINOUS</span></div>
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:planet-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">STELLAR</span></div>
+            <div class="flex items-center gap-2"><iconify-icon icon="solar:bolt-bold" class="text-2xl"></iconify-icon><span class="font-bold text-xl tracking-tighter">NEXUS.AI</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         3. FEATURES (Asymmetrical Bento)
+         ============================================== -->
+    <section class="py-32 w-full max-w-[100rem] mx-auto px-4 lg:px-6">
+      <div class="mb-20 max-w-2xl reveal">
+        <span class="inline-block py-1.5 px-4 rounded-full liquid-glass text-xs text-white/70 tracking-widest uppercase mb-6">Core Architecture</span>
+        <h2 class="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight break-keep-all mb-6">
+          자연의 무작위성,<br>
+          <span class="font-serif italic text-white/70 font-light pr-1">기술</span>로 통제하다.
+        </h2>
+        <p class="text-lg text-white/60 leading-relaxed break-keep-all">
+          NOVA의 렌더링 엔진은 실제 식물의 생장 패턴을 딥러닝으로 분석하여, 완벽한 형태의 디지털 플로랄 오브제를 실시간으로 생성합니다.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[320px]">
+        
+        <!-- Large Card (Col 8) -->
+        <div class="md:col-span-8 liquid-glass-strong rounded-[2.5rem] p-8 lg:p-12 flex flex-col justify-between group overflow-hidden reveal">
+          <div class="relative z-10 max-w-md">
+            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6">
+              <iconify-icon icon="solar:layers-bold" class="text-2xl text-white"></iconify-icon>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-4">다차원 형태 레이어링</h3>
+            <p class="text-white/60 leading-relaxed break-keep-all">꽃잎의 곡률, 줄기의 장력, 잎맥의 패턴까지 수천 개의 변수를 조정하여 세상에 없는 종을 디자인하세요.</p>
+          </div>
+          <div class="absolute right-0 bottom-0 w-2/3 h-2/3 translate-y-12 translate-x-12 group-hover:translate-y-8 group-hover:translate-x-8 supa-transition rounded-tl-3xl overflow-hidden border-t border-l border-white/10">
+            <img src="https://images.unsplash.com/photo-1550505187-2f3b90ec5948?auto=format&fit=crop&w=800&q=80" alt="Abstract Plant 3D" class="w-full h-full object-cover grayscale opacity-60">
+            <div class="absolute inset-0 bg-black/20 mix-blend-overlay"></div>
+          </div>
+        </div>
+
+        <!-- Square Card (Col 4) -->
+        <div class="md:col-span-4 liquid-glass rounded-[2.5rem] p-8 flex flex-col justify-between hover-scale group reveal">
+          <div>
+            <div class="flex items-center justify-between mb-8">
+              <span class="text-xs text-white/50 tracking-widest uppercase">Performance</span>
+              <iconify-icon icon="solar:bolt-circle-linear" class="text-2xl text-white/40"></iconify-icon>
+            </div>
+            <h3 class="text-2xl font-semibold text-white mb-2">2.3초</h3>
+            <p class="text-white/60 text-sm break-keep-all">복잡한 3D 모델의 실시간 제너레이션 소요 시간</p>
+          </div>
+          <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-8">
+            <div class="h-full w-[85%] bg-white rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Square Card (Col 4) -->
+        <div class="md:col-span-4 liquid-glass rounded-[2.5rem] p-8 flex flex-col justify-between hover-scale group reveal">
+          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-6">
+            <iconify-icon icon="solar:pallete-2-linear" class="text-2xl text-white"></iconify-icon>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-white mb-3">질감 추출 알고리즘</h3>
+            <p class="text-white/60 text-sm leading-relaxed break-keep-all">이미지 업로드 한 번으로 실제 식물의 텍스처를 3D 메쉬에 완벽하게 매핑합니다.</p>
+          </div>
+        </div>
+
+        <!-- Wide Card (Col 8) -->
+        <div class="md:col-span-8 liquid-glass-strong rounded-[2.5rem] p-8 lg:p-12 flex flex-col md:flex-row items-center justify-between gap-8 group reveal">
+          <div class="flex-1">
+            <span class="inline-block px-3 py-1 bg-white/10 rounded-full text-[10px] uppercase tracking-widest text-white/80 mb-4 border border-white/10">API Integration</span>
+            <h3 class="text-2xl font-semibold text-white mb-4">어디서든 피어나는 디자인</h3>
+            <p class="text-white/60 leading-relaxed break-keep-all mb-8">생성된 에셋을 언리얼 엔진, 블렌더, 웹 환경으로 즉시 익스포트하세요. 워크플로우의 단절은 없습니다.</p>
+            <div class="flex gap-2">
+              <div class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center"><iconify-icon icon="solar:box-linear" class="text-white/70"></iconify-icon></div>
+              <div class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center"><iconify-icon icon="solar:monitor-camera-linear" class="text-white/70"></iconify-icon></div>
+              <div class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center"><iconify-icon icon="solar:code-square-linear" class="text-white/70"></iconify-icon></div>
+            </div>
+          </div>
+          <div class="w-full md:w-1/2 h-full min-h-[200px] rounded-2xl liquid-glass relative overflow-hidden flex items-center justify-center border border-white/5">
+             <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:250%_250%] animate-[pulse_3s_ease-in-out_infinite]"></div>
+             <iconify-icon icon="solar:augmented-reality-bold-duotone" class="text-6xl text-white/20"></iconify-icon>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================
+         4. METRICS / SAAS STATS
+         ============================================== -->
+    <section class="py-32 border-y border-white/5 bg-black/40 backdrop-blur-md relative overflow-hidden reveal">
+      <div class="absolute inset-0 liquid-glass opacity-50 pointer-events-none"></div>
+      <div class="max-w-[100rem] mx-auto px-4 lg:px-6 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24 divide-y md:divide-y-0 md:divide-x divide-white/10">
+          
+          <div class="pt-8 md:pt-0 md:px-8 text-center flex flex-col items-center">
+            <span class="text-5xl lg:text-7xl font-light text-white tracking-tighter mb-4" style="font-family: 'Geist', sans-serif;">47,200+</span>
+            <span class="text-sm text-white/50 tracking-widest uppercase">생성된 오브제</span>
+          </div>
+          
+          <div class="pt-8 md:pt-0 md:px-8 text-center flex flex-col items-center">
+            <span class="text-5xl lg:text-7xl font-light text-white tracking-tighter mb-4" style="font-family: 'Geist', sans-serif;">98.7%</span>
+            <span class="text-sm text-white/50 tracking-widest uppercase">렌더링 정확도</span>
+          </div>
+          
+          <div class="pt-8 md:pt-0 md:px-8 text-center flex flex-col items-center">
+            <span class="text-5xl lg:text-7xl font-light text-white tracking-tighter mb-4" style="font-family: 'Geist', sans-serif;">12M</span>
+            <span class="text-sm text-white/50 tracking-widest uppercase">학습된 식물 데이터</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         5. TESTIMONIALS (Masonry style cards)
+         ============================================== -->
+    <section class="py-32 w-full max-w-[100rem] mx-auto px-4 lg:px-6">
+      <div class="text-center mb-20 reveal">
+        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-6">디자이너들의 <span class="font-serif italic font-light text-white/80">새로운 언어</span></h2>
+        <p class="text-white/60">최고의 스튜디오들이 NOVA를 통해 상상을 현실로 만듭니다.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="liquid-glass rounded-3xl p-8 flex flex-col gap-6 reveal">
+          <div class="flex items-center gap-1 text-white/80">
+            <iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon>
+          </div>
+          <p class="text-lg text-white/90 leading-relaxed break-keep-all flex-1">"이전에는 클라이언트가 요구하는 초현실적인 플로럴 아트워크를 수작업으로 모델링하느라 밤을 새웠습니다. NOVA 도입 후 작업 시간이 80% 단축되었고, 퀄리티는 오히려 상승했습니다."</p>
+          <div class="flex items-center gap-4 pt-6 border-t border-white/10">
+            <img src="https://i.pravatar.cc/150?u=hy" alt="하윤서" class="w-12 h-12 rounded-full grayscale opacity-80">
+            <div>
+              <div class="text-white font-medium">하윤서</div>
+              <div class="text-white/50 text-sm">루미너스 스튜디오 디렉터</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="liquid-glass rounded-3xl p-8 flex flex-col gap-6 lg:translate-y-12 reveal" style="transition-delay: 100ms;">
+          <div class="flex items-center gap-1 text-white/80">
+            <iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon>
+          </div>
+          <p class="text-lg text-white/90 leading-relaxed break-keep-all flex-1">"단순히 프리셋을 조합하는 수준이 아닙니다. 식물의 생장 규칙을 이해하고 변형을 가하는 방식이 매우 논리적이며, 결과물은 경이로울 정도로 아름답습니다."</p>
+          <div class="flex items-center gap-4 pt-6 border-t border-white/10">
+            <img src="https://i.pravatar.cc/150?u=dh" alt="박도현" class="w-12 h-12 rounded-full grayscale opacity-80">
+            <div>
+              <div class="text-white font-medium">박도현</div>
+              <div class="text-white/50 text-sm">넥스트비전 프로덕트 디자이너</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="liquid-glass rounded-3xl p-8 flex flex-col gap-6 md:hidden lg:flex reveal" style="transition-delay: 200ms;">
+          <div class="flex items-center gap-1 text-white/80">
+            <iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold"></iconify-icon><iconify-icon icon="solar:star-bold-duotone"></iconify-icon>
+          </div>
+          <p class="text-lg text-white/90 leading-relaxed break-keep-all flex-1">"무겁고 복잡한 3D 툴에 의존하던 우리 팀에게 NOVA의 직관적인 인터페이스와 실시간 렌더링은 그야말로 패러다임의 전환이었습니다. 완벽한 도구입니다."</p>
+          <div class="flex items-center gap-4 pt-6 border-t border-white/10">
+            <img src="https://i.pravatar.cc/150?u=sj" alt="이서진" class="w-12 h-12 rounded-full grayscale opacity-80">
+            <div>
+              <div class="text-white font-medium">이서진</div>
+              <div class="text-white/50 text-sm">브릿지웍스 마케팅 리드</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================
+         6. CTA (Full-bleed impact)
+         ============================================== -->
+    <section class="py-32 w-full max-w-[100rem] mx-auto px-4 lg:px-6">
+      <div class="liquid-glass-strong w-full rounded-[3rem] py-32 px-6 flex flex-col items-center justify-center text-center relative overflow-hidden reveal">
+        
+        <!-- Subtle background glow within CTA -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none"></div>
+        
+        <iconify-icon icon="solar:flower-bold-duotone" class="text-6xl text-white/80 mb-8 animate-float"></iconify-icon>
+        
+        <h2 class="text-5xl md:text-7xl font-bold text-white tracking-tight mb-8 break-keep-all">
+          당신의 아이디어, <br>
+          <span class="font-serif italic font-light text-white/80">가장 아름답게</span> 피어나도록.
+        </h2>
+        
+        <p class="text-lg md:text-xl text-white/60 mb-12 max-w-2xl break-keep-all">
+          다운로드 없이 웹 브라우저에서 즉시 시작할 수 있습니다. 수만 명의 크리에이터가 선택한 생태계에 합류하세요.
+        </p>
+        
+        <button class="bg-white text-black rounded-full px-10 py-5 text-lg font-semibold flex items-center gap-4 hover-scale shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+          무료로 시작하기
+          <div class="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center">
+            <iconify-icon icon="solar:arrow-right-linear" class="text-black text-xl"></iconify-icon>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         7. FOOTER
+         ============================================== -->
+    <footer class="py-12 px-6 w-full max-w-[100rem] mx-auto border-t border-white/10 text-white/50 text-sm relative z-10 reveal">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+          <iconify-icon icon="solar:leaf-bold" class="text-xl text-white/80"></iconify-icon>
+          <span class="font-semibold text-white tracking-widest uppercase">NOVA AI</span>
+        </div>
+        
+        <div class="flex gap-8 font-medium">
+          <a href="#" class="hover:text-white supa-transition">솔루션</a>
+          <a href="#" class="hover:text-white supa-transition">갤러리</a>
+          <a href="#" class="hover:text-white supa-transition">요금제</a>
+          <a href="#" class="hover:text-white supa-transition">회사소개</a>
+        </div>
+        
+        <div class="flex gap-4">
+          <a href="#" class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center hover:text-white hover-scale"><iconify-icon icon="solar:hashtag-linear" class="text-lg"></iconify-icon></a>
+          <a href="#" class="w-10 h-10 rounded-full liquid-glass flex items-center justify-center hover:text-white hover-scale"><iconify-icon icon="solar:link-minimalistic-bold" class="text-lg"></iconify-icon></a>
+        </div>
+      </div>
+      
+      <div class="mt-12 flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/5">
+        <p>&copy; 2024 NOVA Technologies. All rights reserved.</p>
+        <div class="flex gap-4 mt-4 md:mt-0">
+          <a href="#" class="hover:text-white supa-transition">개인정보처리방침</a>
+          <a href="#" class="hover:text-white supa-transition">이용약관</a>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+    // Intersection Observer for scroll animations
+    document.addEventListener("DOMContentLoaded", () => {
+      const observerOptions = {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.15
+      };
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target); // Run once
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach((el) => {
+        observer.observe(el);
+      });
+    });
+  </script>
+</body>
+</html>

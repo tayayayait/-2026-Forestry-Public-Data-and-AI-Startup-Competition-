@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Forest Therapy AI">
+  <rect width="64" height="64" rx="14" fill="#f8faf0"/>
+  <path d="M33 10c6 7 14 17 14 28 0 8-6 15-14 15s-14-7-14-15c0-11 8-21 14-28Z" fill="#15803d"/>
+  <path d="M33 18c-3 7-4 14-4 24 0 4 1 8 4 11 3-3 4-7 4-11 0-10-1-17-4-24Z" fill="#bbf7d0" opacity=".9"/>
+  <path d="M24 39c4-1 7-3 9-7 2 4 5 6 9 7" fill="none" stroke="#f8faf0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
