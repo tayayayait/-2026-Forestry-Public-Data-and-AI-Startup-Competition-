@@ -24,10 +24,12 @@ Last updated: 2026-05-27
 
 | Area                | Status          | Evidence                                                                                                     |
 | ------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
-| Test suite          | Pass            | `npm test`                                                                                                   |
+| Test suite          | Known failures  | `npm test` currently reports 10 existing failures across kids forest detail/map, map curation, plant source, Gemini image curation, and homepage analysis expectations. |
 | Type check          | Pass            | `npx tsc --noEmit`                                                                                           |
 | Production build    | Pass on Node 22 | `npm run build` uses `scripts/build-with-supported-node.cjs` to avoid the Node 24 Windows Vite/Rollup crash. |
 | Vercel SSR output   | Fixed           | `vite.config.ts` includes Nitro's Vercel preset so `npm run build` emits `.vercel/output/config.json` and routes all non-static requests to `__server`. |
+| Vercel SSR renderer | Fixed           | `src/nitro-ssr-renderer.ts` delegates Nitro's catch-all renderer to the TanStack Start `ssr` service, preventing the legacy static `index.html` page from replacing app routes. |
+| Landing asset path  | Fixed           | The landing background WebP uses the ASCII public path `/home-background-16s.webp`, avoiding encoded Korean filename 404s in production preview. |
 | Lint                | Pass target     | Source files were normalized with Prettier.                                                                  |
 | Supabase client URL | Fixed           | `VITE_SUPABASE_URL` now points to the project root URL, not `/rest/v1/`.                                     |
 

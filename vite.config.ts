@@ -1,15 +1,17 @@
-// @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, cloudflare (build-only),
-//     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
-//     error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... } }) if needed.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig, type ConfigEnv, type Plugin } from "vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import tsConfigPaths from "vite-tsconfig-paths";
 import { nitro } from "nitro/vite";
-import type { ConfigEnv, Plugin } from "vite";
 
 function nitroForVercelBuild(): Plugin[] {
-  return nitro({ preset: "vercel" }).map((plugin) => {
+  return nitro({
+    preset: "vercel",
+    renderer: {
+      handler: "./src/nitro-ssr-renderer.ts",
+    },
+  }).map((plugin) => {
     const originalApply = plugin.apply;
 
     return {
@@ -29,20 +31,46 @@ function nitroForVercelBuild(): Plugin[] {
   });
 }
 
-// Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-// Nitro's Vercel preset emits .vercel/output so Vercel routes all SSR requests to the server function.
-// @cloudflare/vite-plugin builds from this; wrangler.jsonc main alone is insufficient.
+const viteEnvDefines = Object.fromEntries(
+  Object.entries(process.env)
+    .filter(([key]) => key.startsWith("VITE_"))
+    .map(([key, value]) => [`import.meta.env.${key}`, JSON.stringify(value)]),
+);
+
 export default defineConfig({
-  cloudflare: false,
-  tanstackStart: {
-    server: { entry: "server" },
+  server: {
+    host: "::",
+    port: 8080,
   },
-  vite: {
-    plugins: nitroForVercelBuild(),
-    resolve: {
-      alias: {
-        "@supabase/node-fetch": "@supabase/node-fetch/browser.js",
+  define: viteEnvDefines,
+  plugins: [
+    tailwindcss(),
+    tsConfigPaths({ projects: ["./tsconfig.json"] }),
+    tanstackStart({
+      server: { entry: "server" },
+      importProtection: {
+        behavior: "error",
+        client: {
+          files: ["**/server/**"],
+          specifiers: ["server-only"],
+        },
       },
+    }),
+    ...nitroForVercelBuild(),
+    viteReact(),
+  ],
+  resolve: {
+    alias: {
+      "@": `${process.cwd()}/src`,
+      "@supabase/node-fetch": "@supabase/node-fetch/browser.js",
     },
+    dedupe: [
+      "react",
+      "react-dom",
+      "react/jsx-runtime",
+      "react/jsx-dev-runtime",
+      "@tanstack/react-query",
+      "@tanstack/query-core",
+    ],
   },
 });

@@ -22,8 +22,7 @@ export const Route = createFileRoute("/")({
   component: ForestLandingPage,
 });
 
-const homeBackgroundWebpSrc =
-  "/%ED%99%88%ED%99%94%EB%A9%B4%20%EB%B0%B0%EA%B2%BD%EC%98%81%EC%83%81%2016%EC%B4%88.webp";
+const homeBackgroundWebpSrc = "/home-background-16s.webp";
 
 const landingStyles = `
   :root {

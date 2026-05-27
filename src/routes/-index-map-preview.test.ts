@@ -24,7 +24,7 @@ describe("home landing page", () => {
   it("uses the animated WebP background asset on the landing page", () => {
     expect(source).toContain("homeBackgroundWebpSrc");
     expect(source).toContain(
-      '"/%ED%99%88%ED%99%94%EB%A9%B4%20%EB%B0%B0%EA%B2%BD%EC%98%81%EC%83%81%2016%EC%B4%88.webp"',
+      '"/home-background-16s.webp"',
     );
     expect(source).toContain("<img");
     expect(source).toContain('decoding="async"');
